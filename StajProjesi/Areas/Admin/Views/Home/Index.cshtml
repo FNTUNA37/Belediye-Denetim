@@ -1,0 +1,133 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.RaporIndex
+    <link href="~/Content/Create.css" rel="stylesheet" />
+
+    <div class="btn-toolbar">
+        <a href="@Url.Action("Index")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Haftalık Rapor</a>
+        <a href="@Url.Action("Genel")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Genel Rapor Üretim</a>
+        <a href="@Url.Action("Arıza")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Genel Arıza Tespit</a>
+        <a href="@Url.Action("Aylık")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Aylık Rapor</a>
+    </div>
+    <form name="myform" method="post">
+        <div class="simple-login-container">
+            <div class="col-md-12 form-group">
+                <select class="form-control " id="firma-select" name="FirmaId">
+                    @{
+                        <option selected>Firma Seçiniz</option>
+                        foreach (var firma in Model.Firmalar)
+                        {
+                            <option value="@firma.FirmaId">@firma.FirmaAdı</option>
+                        }
+                    }
+                </select>
+                <input type="week" class="form-control" id="Hafta" name="Hafta" value="@DateTime.Now" />
+                <input type="submit" onclick="SendData()" value="GETİR" class="btn btn-success form-control " id="tb" />
+            </div>
+            @if (Model.Hafta != null)
+            {
+                var firma = Database.Session.Load<StajProjesi.Models.Firma>(Model.FirmaId);
+                <h2>@firma.FirmaAdı @Model.Yıl Yılı @Model.Hafta. Hafta Raporu </h2>
+            }
+        </div>
+        
+           @if (Model.Hafta != null)
+            {
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr style="background-color:darkblue">
+                            <td style="color:white">Tarih</td>
+                            <td style="color:white">saat</td>
+                            <td style="color:white">Raporu Üreten</td>
+                            <td style="color:white">Gecikme</td>
+                            <td style="color:white">Tespit Edilen Arızalar</td>
+
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+@{ 
+                        foreach (var gorev in Model.Gorevler)
+                        {if (gorev.FirmaId == Model.FirmaId)
+                        {
+                        if (Convert.ToDateTime(gorev.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                        {
+                        if (gorev.Hafta == Convert.ToInt32(Model.Hafta))
+                        {
+                        foreach (var rapor in Model.Raporlar)
+                        {
+                        if (rapor.RaporTarihi == gorev.Tarih)
+                        {
+                        <tr>
+
+                            <td>@rapor.RaporTarihi.Substring(0, 10)</td>
+                            <td>@rapor.RaporSaati</td>
+                            <td>
+                                @{
+                                    var user = Database.Session.Load<StajProjesi.Models.User>(rapor.KullanıcıId);
+                                }
+                                @user.Ad @user.Soyad
+                            </td>
+
+
+                            @{
+                                string durum;
+                                var firma = Database.Session.Load<StajProjesi.Models.Firma>(user.FirmaId);
+                                if (Convert.ToDateTime(rapor.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati))
+                                {
+                                    durum = "Gecikmeli";
+                                    <td style="color:red">@durum</td>
+                                }
+                                else
+                                {
+                                    durum = "Zamanında";
+                                    <td>@durum</td>}
+
+                            }
+
+                            <td>
+                                @String.Join("  ,  ", rapor.Hata.Select(p => p.Konu))
+                            </td>
+
+
+                        </tr>
+                        }
+
+                        }
+                        }
+                        }
+
+                        }
+                        }
+                        }
+                        
+                    </tbody>
+
+                </table>
+                }
+            </form>
+    <script>
+    function Data() {
+        var selectedValue = $("select[name='FirmaId']")[0];
+            $.ajax({
+                data: { "FirmaId": selectedValue  },
+                url: '@Url.Action("Index")',
+                type: "POST",
+                success: function (returndata) {
+
+                }
+            });
+       var _data = { Hafta: $("#Hafta").val()};
+            $.ajax({
+                url: '@Url.Action("Index")',
+                type: "POST",
+                data: _data,
+                success: function () {
+                  document.myform.submit();
+                }
+            });
+        }
+
+    </script>
+<style>
+    
+</style>

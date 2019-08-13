@@ -1,0 +1,88 @@
+﻿
+@model StajProjesi.Areas.Admin.ViewModels.GorevNew
+<link href="~/Content/Create.css" rel="stylesheet" />
+<link href="~/Content/datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker.js"></script>
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary()
+    <div class="simple-login-container" style="padding-top:20px;">
+        <h2>YENİ GÖREV</h2>
+
+        <div class=" col-md-12 form-group">
+            <select class="form-control" id="firma-select" name="FirmaId">
+                @{
+                    <option selected>Firma Seçiniz</option>
+                    foreach (var firma in Model.Firmalar)
+                    {
+                        <option value="@firma.FirmaId" slug="@firma.FirmaId">@firma.FirmaAdı</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class=" col-md-12 form-group">
+            <select class="form-control" id="kullanıcı-select" name="KullanıcıId">
+                @{
+                    <option selected>Görevli Seçiniz</option>
+                    foreach (var kullanıcı in Model.Kullanıcılar)
+                    {
+                        <option value="@kullanıcı.KullanıcıId" firma-slug="@kullanıcı.FirmaId">@kullanıcı.KullanıcıAdı</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class=" col-md-12 form-group">
+            <input id="tarih" name="Tarih" type="text" 
+                   class="datepicker-here form-control"
+                   data-language='en'
+                   data-multiple-dates="5"
+                   data-multiple-dates-separator=", "
+                   data-position='top left' autocomplete="off"/>
+        </div>
+        <div class=" col-md-12 form-group">
+            <input type="submit" onclick="SendData()" value="OLUŞTUR" class="btn btn-success" id="tb" />
+            <a href="@Url.Action("Index")" role="button" class="btn btn-outline-primary">GERİ</a>
+        </div>
+    </div>
+
+}
+<script>
+        $(function(){
+	$("#kullanıcı-select option").hide();
+	$("#firma-select").change(function(){
+		$("#kullanıcı-select option").hide();
+		var slug = $("#firma-select option:selected").attr("slug");
+		if(slug){
+			$("#kullanıcı-select option[firma-slug='"+slug+"']").show();
+		}
+	});
+        });
+    
+        function SendData() {
+                var selectedValue = $("select[name='KullanıcıId']")[0];
+            $.ajax({
+                data: { "KullanıcıId": selectedValue  },
+                url: '@Url.Action("New")',
+                type: "POST",
+                success: function (returndata) {
+
+                }
+            });   
+                   var selectedValue2 = $("select[name='FirmaId']")[0];
+            $.ajax({
+                data: { "FirmaId": selectedValue2  },
+                url: '@Url.Action("New")',
+                type: "POST",
+                success: function (returndata) {
+
+                }
+            });
+            var _data = { Tarih: $("#tarih").val()};
+            $.ajax({
+                url: '@Url.Action("New")',
+                type: "POST",
+                data: _data,
+                success: function (result) {}
+            });
+        }
+</script>

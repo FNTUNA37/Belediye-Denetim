@@ -1,0 +1,22 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.FirmaNew
+<link href="~/Content/Create.css" rel="stylesheet" />
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary()
+    <div class="simple-login-container">
+        <h2>YENİ FİRMA</h2>
+        <div class="col-md-12 form-group">
+
+            @Html.TextBoxFor(x => x.FirmaAdı, new { @class = "form-control", @placeholder = "Firma Adı" })
+            @Html.ValidationMessageFor(X => X.FirmaAdı, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-12 form-group">
+            <input type="time" name="TeslimSaati" />           
+        </div>
+        <div class="col-md-12 form-group">
+            <input type="submit" value="OLUŞTUR" class="btn btn-success" />
+            <a href="@Url.Action("Index")" role="button" class="btn btn-outline-primary">GERİ</a>
+        </div>
+    </div>
+
+}

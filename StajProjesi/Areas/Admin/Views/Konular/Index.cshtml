@@ -1,0 +1,40 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.KonuIndex
+
+<script src="~/Areas/Admin/Scripts/Forms.js"></script>
+<div class="btn-toolbar">
+    <a href="@Url.Action("New")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-plus"></i>Yeni Konu</a>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Konu</td>
+            
+            <td>Firma - Başlık</td>
+            <td>Düzenleme</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var konu in Model.Konular)
+        {
+        <tr>
+            <td>@konu.KonuId</td>
+            <td>@konu.Konu</td>
+           
+            <td>
+                @{
+                    var baslık = Database.Session.Load<StajProjesi.Models.Baslık>(konu.BaslıkId);
+                    var firma =Database.Session.Load<StajProjesi.Models.Firma>(baslık.FirmaId);
+                }
+                @firma.FirmaAdı - @baslık.BaslıkAdı 
+            </td>
+            <td>
+                <div class="btn-group">
+                    <a href="@Url.Action("Edit",new {konu.KonuId})" , class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i>Düzenle</a>
+                    <a href="@Url.Action("Delete",new { konu.KonuId})" , data-post="@konu.KonuId IDli Konu silinsin mi?" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i>Sil</a>
+                </div>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

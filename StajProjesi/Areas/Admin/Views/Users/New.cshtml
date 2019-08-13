@@ -1,0 +1,65 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.UsersNew
+    <link href="~/Content/Create.css" rel="stylesheet" />
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary()
+<div class="simple-login-container">
+    <h2>YENİ KULLANICI</h2>
+    <div class="col-md-12 form-group">
+
+        @Html.TextBoxFor(x => x.Ad, new { @class = "form-control", @placeholder = "Ad" })
+        @Html.ValidationMessageFor(X => X.Ad, "", new { @class = "text-danger" })
+    </div>
+    <div class=" col-md-12 form-group">
+
+        @Html.TextBoxFor(x => x.Soyad, new { @class = "form-control", @placeholder = "Soyad" })
+        @Html.ValidationMessageFor(X => X.Soyad, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-12 form-group">
+
+        @Html.TextBoxFor(x => x.KullanıcıAdı, new { @class = "form-control", @placeholder = "Kullanıcı adı" })
+        @Html.ValidationMessageFor(X => X.KullanıcıAdı, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-md-12 form-group">
+
+        @Html.TextBoxFor(x => x.Sifre, new { @class = "form-control", @placeholder = "Şifre" })
+        @Html.ValidationMessageFor(X => X.Sifre, "", new { @class = "text-danger" })
+    </div>
+    <div class=" col-md-12 form-group">
+        <select class="form-control" id="firma-select" name="FirmaId">
+            @{
+                <option selected>Firma Seçiniz</option>
+                foreach (var firma in Model.Firmalar)
+                {
+                    <option value="@firma.FirmaId" slug="@firma.FirmaId">@firma.FirmaAdı</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-12 form-group">
+        @Html.Partial("_RoleEditor", Model.Rol)
+    </div>
+    <div class="col-md-12 form-group">
+        <input type="submit" value="OLUŞTUR" class="btn btn-success" />
+        <a href="@Url.Action("Index")" role="button" class="btn btn-outline-primary">GERİ</a>
+    </div>
+</div>
+
+}
+<script>
+
+        function GetSelected() {
+            var selectedValue = $("select[name='FirmaId']")[0];
+            if (selectedValue != 0) {
+                $.ajax({
+                    data: { "selectedValue": selectedValue },
+                    url: '@Url.Action("New")',
+                    type: "POST",
+                    success: function (returndata) {
+
+                    }
+                });
+            }
+    }
+    </script>

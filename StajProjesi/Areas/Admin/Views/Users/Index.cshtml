@@ -1,0 +1,45 @@
+﻿
+@model StajProjesi.Areas.Admin.ViewModels.UsersIndex
+
+<script src="~/Areas/Admin/Scripts/Forms.js"></script>
+<div class="btn-toolbar">
+    <a href="@Url.Action("New")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-plus"></i>Yeni Kullanıcı</a>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Ad</td>
+            <td>Soyad</td>
+            <td>Kullanıcı Adı</td>
+            <td>Firma</td>
+            <td>Rol</td>
+            <td>Düzenleme</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+        <tr>
+            <td>@user.KullanıcıId</td>
+            <td>@user.Ad</td>
+            <td>@user.Soyad</td>
+            <td>@user.KullanıcıAdı</td>        
+            <td>
+                @{                  
+                    var firma = Database.Session.Load<StajProjesi.Models.Firma>(user.FirmaId);
+                }
+                @firma.FirmaAdı
+            </td>
+            <td>@String.Join(", ", user.Rol.Select(p => p.RolAdı))</td>
+            <td>
+                <div class="btn-group">
+                    <a href="@Url.Action("Edit",new {user.KullanıcıId})" , class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i>Düzenle</a>
+                    <a href="@Url.Action("ResetPassword",new { user.KullanıcıId})" , class="btn btn-xs btn-default"><i class="glyphicon glyphicon-lock"></i>Şifre Sıfırla</a>
+                    <a href="@Url.Action("Delete",new { user.KullanıcıId})" , data-post="@user.KullanıcıAdı kullanıcısı silinsin mi?" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i>Sil</a>
+                </div>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,161 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.ArızaIndex
+<link href="~/Content/Create.css" rel="stylesheet" />
+<link href="~/Content/datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker.js"></script>
+@{
+    string[] aylar = { "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+    int toplam = 0;
+}
+<div class="btn-toolbar">
+    <a href="@Url.Action("Index")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Haftalık Rapor</a>
+    <a href="@Url.Action("Genel")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Genel Rapor Üretim</a>
+    <a href="@Url.Action("Arıza")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Genel Arıza Tespit</a>
+    <a href="@Url.Action("Aylık")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Aylık Rapor</a>
+</div>
+
+<form name="myform" method="post">
+    <div class="simple-login-container">
+        <div class=" col-md-12 form-group ">
+            <select class="form-control " id="firma-select" name="FirmaId">
+                @{
+                    <option selected>Firma Seçiniz</option>
+                    foreach (var firma in Model.Firmalar)
+                    {
+                        <option value="@firma.FirmaId">@firma.FirmaAdı</option>
+                    }
+                }
+            </select>
+            <input type="number" id="Yıl" name="Yıl" class=" form-control" autocomplete="off" placeholder="Yıl" />
+            <input type="submit" onclick="SendData()" value="GETİR" class="btn btn-success form-control " min="2010" id="tb" />
+        </div>
+        @if (Model.Yıl != null)
+        {
+            var firma = Database.Session.Load<StajProjesi.Models.Firma>(Model.FirmaId);
+            <h2>@firma.FirmaAdı Raporu </h2>
+        }
+    </div>
+
+
+    @if (Model.Yıl != null)
+    {
+        var firma = Database.Session.Load<StajProjesi.Models.Firma>(Model.FirmaId);
+<table class="table table-bordered table-striped">
+    <thead>
+    <thead>
+        <tr style="text-align:center">
+
+            <th style="text-align:center; background-color:darkblue" COLSPAN=14><b style="color:white">@Model.Yıl</b></th>
+
+        </tr>
+        <tr style="background-color:yellow;text-align:center">
+            <td> </td>
+            <td> </td>
+            @{
+                foreach (string ay in aylar)
+                {
+                    <td>@ay</td>
+                }
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @{
+             string temp = "";
+            
+            foreach (var konu in Model.Konular)
+            {
+               
+                
+                var baslık = Database.Session.Load<StajProjesi.Models.Baslık>(konu.BaslıkId);
+                <tr style="text-align:center;">
+                    @if (baslık.FirmaId == firma.FirmaId)
+                    {  
+                        if (temp != baslık.BaslıkAdı)
+                        {
+                            <td  style="background-color:yellow; ">@baslık.BaslıkAdı</td>
+                        }
+                        else
+                        {
+                            <td> </td>
+                        }
+
+
+                <td>@konu.Konu</td>
+                
+                    temp = baslık.BaslıkAdı;
+                foreach (string ay in aylar)
+                {
+                    toplam = 0;
+                    foreach (var gorev in Model.Gorevler)
+                    {
+                        if (Convert.ToDateTime(gorev.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                        {
+
+                            if (Convert.ToDateTime(gorev.Tarih).ToString("MMMM") == ay)
+                            {
+                                foreach (var rapor in Model.Raporlar)
+                                {
+                                    if (rapor.RaporTarihi == gorev.Tarih)
+                                    {
+                                        if (Convert.ToDateTime(rapor.RaporTarihi).ToString("MMMM") == ay)
+                                        {
+                                            foreach (var hata in rapor.Hata)
+                                            {
+                                                if (hata.Konu == konu.Konu)
+                                                {
+                                                    toplam += 1;
+
+                                                }
+
+                                            }
+                                        }
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    }
+                    <td>
+                        @toplam
+
+                    </td>
+                }
+
+
+            }
+                </tr>
+                
+        }
+        }
+
+
+
+
+    </tbody>
+
+    </table>
+    }
+</form>
+<script>
+
+     function SendData() {
+              var selectedValue = $("select[name='FirmaId']")[0];
+            $.ajax({
+                data: { "FirmaId": selectedValue  },
+                url: '@Url.Action("Genel")',
+                type: "POST",
+                success: function (returndata) {
+
+                }
+            });
+            var _data = { Yıl: $("#Yıl").val()};
+            $.ajax({
+                url: '@Url.Action("Genel")',
+                type: "POST",
+                data: _data,
+                success: function (result) {}
+            });
+        }
+</script>

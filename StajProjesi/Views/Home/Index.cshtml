@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "Anasayfa";
+}
+
+<link href="~/Content/Home.css" rel="stylesheet" />
+@model StajProjesi.ViewModels.HomeIndex
+
+
+<div class="simple-login-container">
+ <h2>GÖREVLİ: @Model.Gorevli</h2>
+
+    @if (Model.Rapor)
+    {
+            <h2>Bu güne ait rapor var</h2>
+    }
+    else
+    { 
+
+    using (Html.BeginForm())
+    {
+        @Html.ValidationSummary()
+        <div class="col-md-12 form-group">
+            @Html.Partial("_KonuEditor", Model.Konu)
+        </div>
+        <div class=" col-md-12 form-group" style="text-align:center;">
+            <input type="submit" value="OLUŞTUR" onclick="okey()" class ="btn btn-success" />
+
+        </div>
+
+    }
+    }
+</div>
+<style>
+  table,
+td {
+      text-align:center;
+    border: 0.5px solid #333;
+}
+
+thead,
+tfoot {
+    background-color: #ae2c46;
+    color: #fff;
+}
+</style>

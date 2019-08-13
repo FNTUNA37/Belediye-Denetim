@@ -1,0 +1,51 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.GorevIndex
+
+<script src="~/Areas/Admin/Scripts/Forms.js"></script>
+<div class="btn-toolbar">
+    <a href="@Url.Action("New")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-plus"></i>Yeni Görev</a>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Görevli</td>
+            <td>Firma</td>
+            <td>Tarih</td>
+            <td>Düzenleme</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var gorev in Model.Gorevler)
+        {
+        <tr>
+            <td>@gorev.GorevId</td>
+
+            <td>
+                @{
+                    var kullanıcı = Database.Session.Load<StajProjesi.Models.User>(gorev.KullanıcıId);
+                }
+                @kullanıcı.KullanıcıAdı
+            </td>
+            <td>
+                @{
+
+                    var firma = Database.Session.Load<StajProjesi.Models.Firma>(gorev.FirmaId);
+                }
+                @firma.FirmaAdı
+            </td>
+            <td>@gorev.Tarih.Substring(0,10)</td>
+            <td>
+                <div class="btn-group">
+                    <a href="@Url.Action("Edit",new {gorev.GorevId})" , class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i>Düzenle</a>
+                    <a href="@Url.Action("Delete",new { gorev.GorevId})" , data-post="@gorev.Tarih Tarihli Gorev silinsin mi?" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i>Sil</a>
+                </div>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+<script>
+    function SendData() {
+
+    }
+</script>

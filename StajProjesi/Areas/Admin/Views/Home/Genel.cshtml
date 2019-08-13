@@ -1,0 +1,998 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.GenelIndex
+<link href="~/Content/Create.css" rel="stylesheet" />
+<link href="~/Content/datepicker.css" rel="stylesheet" />
+<script src="~/Scripts/datepicker.js"></script>
+@{
+    string[] aylar = { "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+   
+}
+<div class="btn-toolbar">
+    <a href="@Url.Action("Index")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Haftalık Rapor</a>
+    <a href="@Url.Action("Genel")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Genel Rapor Üretim</a>
+    <a href="@Url.Action("Arıza")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Genel Arıza Tespit</a>
+    <a href="@Url.Action("Aylık")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-calendar"></i> Aylık Rapor</a>
+</div>
+
+<form name="myform" method="post">
+    <div class="simple-login-container">
+        <div class=" col-md-12 form-group ">
+            <select class="form-control " id="firma-select" name="FirmaId" >
+                @{
+                    <option selected>Firma Seçiniz</option>
+                    foreach (var firma in Model.Firmalar)
+                    {
+                        <option value="@firma.FirmaId">@firma.FirmaAdı</option>
+                    }
+                }
+            </select>
+            <input type="number" id="Yıl" name="Yıl" class=" form-control" autocomplete="off" placeholder="Yıl"  />
+            <input type="submit" onclick="SendData()" value="GETİR" class="btn btn-success form-control " id="tb" />
+        </div>
+        @if (Model.Yıl != null)
+        {
+            var firma = Database.Session.Load<StajProjesi.Models.Firma>(Model.FirmaId);
+            <h2> @Model.Yıl Yılı @firma.FirmaAdı Raporu </h2>
+        }
+        </div>
+
+
+    @if (Model.Yıl != null)
+    {
+        var firma = Database.Session.Load<StajProjesi.Models.Firma>(Model.FirmaId);
+        <table class="table table-bordered table-striped">
+            <thead>
+            <thead>
+                <tr style="text-align:center">
+                    <th></th>
+                    <th style="text-align:center; background-color:darkblue" COLSPAN=4><b style="color:white">RAPOR ÜRETİM BAŞARI ORANI</b></th>
+
+                </tr>
+                <tr style="background-color:yellow;text-align:center">
+
+                    <td>Aylar</td>
+                    <td>
+                        Üretilmesi Gereken
+                        Rapor Sayısı
+                    </td>
+                    <td>
+                        Üretilen
+                        Rapor Sayısı
+                    </td>
+                    <td>
+                        Rapor Üretim
+                        Oranı
+                    </td>
+                    <td>Başkasına Devredilen Rapor Sayısı</td>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach (string ay in aylar)
+                    {
+                        string temp = "";
+
+
+                        foreach (var gorev in Model.Gorevler)
+                        {
+                            if (gorev.FirmaId == Model.FirmaId)
+                            {
+                                if (Convert.ToDateTime(gorev.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                {
+                                    if (Convert.ToDateTime(gorev.Tarih).ToString("MMMM") == ay)
+                                    {
+
+
+                                        if (temp != ay)
+                                        {
+
+                                            <tr style="text-align:center;">
+                                                <td>@ay</td>
+                                                <td>
+                                                    @{
+                                                        float gereken = 0;
+                                                        foreach (var gorevGereken in Model.Gorevler)
+                                                        {
+                                                            if (gorevGereken.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevGereken.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevGereken.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        gereken += 1;
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+                                                    }
+                                                    @gereken
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float uretilen = 0;
+                                                        foreach (var rapor in Model.Raporlar)
+                                                        {
+                                                            if (rapor.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(rapor.RaporTarihi).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(rapor.RaporTarihi).ToString("MMMM") == ay)
+                                                                    {
+                                                                        uretilen += 1;
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+                                                    }
+                                                    @uretilen
+
+                                                </td>
+                                                <td>
+                                                    @((uretilen / gereken) * 100) %
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float devir = 0;
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevDevir.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId != gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    devir += 1;
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+                                                    }
+                                                    @devir
+                                                </td>
+                                            </tr>
+                                            temp = ay;
+                                        }
+                                        else { }
+                                    }
+
+                                }
+
+                            }
+
+
+                        }
+                    }
+                }
+
+
+
+
+
+            </tbody>
+
+        </table>
+        <table class="table table-bordered table-striped">
+            <thead>
+            <thead>
+                <tr style="text-align:center">
+                    <th></th>
+
+                    <th style="text-align:center; background-color:darkblue" COLSPAN=9><b style="color:white">ZAMANINDA ÜRETİM BAŞARI ORANI</b></th>
+                </tr>
+                <tr style="background-color:yellow;text-align:center">
+
+                    <td>Aylar</td>
+                    <td style="font-size:x-small">Zamanında Gelen Rapor Sayısı (Kendisine Ait)</td>
+                    <td style="font-size:x-small">
+                        Zamanında Gelen Rapor
+                        Sayısı (Başkasının Yerine)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gecikmeli Gelen Rapor
+                        Sayısı (Kendisine Ait)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gecikmeli Gelen Rapor
+                        Sayısı (Başkasının Yerine)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gönderilmeyen
+                        Rapor Sayısı
+                    </td>
+                    <td style="font-size:x-small">
+                        Zamanında Gönderim
+                        Başarı Oranı (Kendisine Ait)
+                    </td>
+                    <td style="font-size:x-small">
+                        Zamanında Gönderim
+                        Başarı Oranı (Başkasının Yerine)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gecikme / Göndermeme
+                        Ceza Puanı*
+                    </td>
+                    <td style="font-size:x-small">Üretilmesi Gereken Rapor Başına Ceza Puanı*</td>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach (string ay in aylar)
+                    {
+                        string temp = "";
+
+
+                        foreach (var gorev in Model.Gorevler)
+                        {
+                            if (gorev.FirmaId == Model.FirmaId)
+                            {
+                                if (Convert.ToDateTime(gorev.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                {
+                                    if (Convert.ToDateTime(gorev.Tarih).ToString("MMMM") == ay)
+                                    {
+
+
+                                        if (temp != ay)
+                                        {
+
+                                            <tr style="text-align:center;">
+                                                <td>@ay</td>
+                                                <td>
+                                                    @{
+                                                        float zamanındaGelenKendi = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevDevir.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId == gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) <= Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        zamanındaGelenKendi += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @zamanındaGelenKendi
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float zamanındaGelenBaskası = 0;
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevDevir.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId != gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) <= Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        zamanındaGelenBaskası += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @zamanındaGelenBaskası
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float gecikenKendi = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevDevir.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId == gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        gecikenKendi += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @gecikenKendi
+                                                    }
+
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float gecikenBaskası = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevDevir.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId != gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        gecikenBaskası += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @gecikenBaskası
+                                                    }
+                                                </td>
+
+                                                <td>
+                                                    @{
+                                                        float gonderilmeyen = 0;
+                                                        float gereken = 0;
+                                                        foreach (var gorevGereken in Model.Gorevler)
+                                                        {
+                                                            if (gorevGereken.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevGereken.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevGereken.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        gereken += 1;
+                                                                    }
+                                                                }
+                                                            }
+                                                            float uretilen = 0;
+                                                            foreach (var rapor in Model.Raporlar)
+                                                            {
+                                                                if (rapor.FirmaId == Model.FirmaId)
+                                                                {
+                                                                    if (Convert.ToDateTime(rapor.RaporTarihi).Year == Convert.ToInt32(Model.Yıl))
+                                                                    {
+                                                                        if (Convert.ToDateTime(rapor.RaporTarihi).ToString("MMMM") == ay)
+                                                                        {
+                                                                            uretilen += 1;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                gonderilmeyen = gereken - uretilen;
+                                                            }
+                                                        }
+                                                    }
+                                                    @gonderilmeyen
+                                                </td>
+                                                <td>@((zamanındaGelenKendi / (zamanındaGelenKendi + gecikenKendi + gonderilmeyen)) * 100)%</td>
+                                                <td>@((zamanındaGelenBaskası / (zamanındaGelenBaskası + gecikenBaskası)) * 100)%</td>
+                                                <td>
+                                                    @{
+                                                        float ceza = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (Convert.ToDateTime(gorevDevir.Tarih).ToString("MMMM") == ay)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+
+                                                                                if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati) && Convert.ToDateTime(rapor2.RaporSaati) < Convert.ToDateTime(firma.TeslimSaati).AddHours(0.5))
+                                                                                {
+                                                                                    ceza += 1;
+                                                                                }
+                                                                                else if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati).AddHours(0.5) && Convert.ToDateTime(rapor2.RaporSaati) < Convert.ToDateTime(firma.TeslimSaati).AddHours(1.5))
+                                                                                {
+                                                                                    ceza += 3;
+                                                                                }
+                                                                                else if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati).AddHours(1.5) && Convert.ToDateTime(rapor2.RaporSaati) < Convert.ToDateTime(firma.TeslimSaati).AddHours(3))
+                                                                                {
+                                                                                    ceza += 1;
+                                                                                }
+                                                                                else if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati).AddHours(3))
+                                                                                {
+                                                                                    ceza += 7;
+                                                                                }
+
+
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        ceza += gonderilmeyen * 10;
+                                                        @ceza
+                                                    }
+                                                </td>
+                                                <td>@((ceza / (zamanındaGelenKendi + gecikenKendi + gonderilmeyen)))</td>
+
+                                            </tr>
+                                            temp = ay;
+                                        }
+                                        else { }
+                                    }
+
+                                }
+
+                            }
+
+
+                        }
+
+
+                    }
+
+                }
+
+
+            </tbody>
+
+        </table>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+            <thead>
+                <tr style="text-align:center">
+                    <th></th>
+                    <th style="text-align:center; background-color:darkblue" COLSPAN=4><b style="color:white">RAPOR ÜRETİM BAŞARI ORANI</b></th>
+
+                </tr>
+                <tr style="background-color:yellow;text-align:center">
+
+                    <td>Personel</td>
+                    <td>
+                        Üretilmesi Gereken
+                        Rapor Sayısı
+                    </td>
+                    <td>
+                        Üretilen
+                        Rapor Sayısı
+                    </td>
+                    <td>
+                        Rapor Üretim
+                        Oranı
+                    </td>
+                    <td>Başkasına Devredilen Rapor Sayısı</td>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach (var kullanıcı in Model.Kullanıcılar)
+                    {
+                        int temp = 0;
+
+
+                        foreach (var gorev in Model.Gorevler)
+                        {
+                            if (gorev.FirmaId == Model.FirmaId)
+                            {
+                                if (Convert.ToDateTime(gorev.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                {
+                                    if (gorev.KullanıcıId == kullanıcı.KullanıcıId)
+                                    {
+
+
+                                        if (temp != kullanıcı.KullanıcıId)
+                                        {
+
+                                            <tr style="text-align:center;">
+                                                <td>@kullanıcı.Ad @kullanıcı.Soyad</td>
+                                                <td>
+                                                    @{
+                                                        float gereken = 0;
+                                                        foreach (var gorevGereken in Model.Gorevler)
+                                                        {
+                                                            if (gorevGereken.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevGereken.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevGereken.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        gereken += 1;
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+                                                    }
+                                                    @gereken
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float uretilen = 0;
+                                                        foreach(var gorevuretilen in Model.Gorevler) {
+                                                            foreach (var rapor in Model.Raporlar)
+                                                            {
+
+                                                                if (rapor.FirmaId == Model.FirmaId)
+                                                                {
+                                                                    if (Convert.ToDateTime(rapor.RaporTarihi).Year == Convert.ToInt32(Model.Yıl)&&Convert.ToDateTime(gorevuretilen.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                    {
+                                                                        if (rapor.RaporTarihi == gorevuretilen.Tarih)
+                                                                        {
+                                                                            if (rapor.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                            {
+
+                                                                                uretilen += 1;
+                                                                            }
+
+                                                                        }
+
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+                                                    }
+
+                                                    @uretilen
+
+                                                </td>
+                                                <td>
+                                                    @((uretilen / gereken) * 100) %
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float devir = 0;
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevDevir.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId != gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    devir += 1;
+                                                                                }
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+                                                    }
+                                                    @devir
+                                                </td>
+                                            </tr>
+                                            temp = kullanıcı.KullanıcıId;
+                                        }
+                                        else { }
+                                    }
+
+                                }
+
+                            }
+
+
+                        }
+
+
+                    }
+                }
+
+
+
+            </tbody>
+
+        </table>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+            <thead>
+                <tr style="text-align:center">
+                    <th></th>
+
+                    <th style="text-align:center; background-color:darkblue" COLSPAN=9><b style="color:white">ZAMANINDA ÜRETİM BAŞARI ORANI</b></th>
+                </tr>
+                <tr style="background-color:yellow;text-align:center">
+
+                    <td>Personel</td>
+                    <td style="font-size:x-small">Zamanında Gelen Rapor Sayısı (Kendisine Ait)</td>
+                    <td style="font-size:x-small">
+                        Zamanında Gelen Rapor
+                        Sayısı (Başkasının Yerine)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gecikmeli Gelen Rapor
+                        Sayısı (Kendisine Ait)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gecikmeli Gelen Rapor
+                        Sayısı (Başkasının Yerine)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gönderilmeyen
+                        Rapor Sayısı
+                    </td>
+                    <td style="font-size:x-small">
+                        Zamanında Gönderim
+                        Başarı Oranı (Kendisine Ait)
+                    </td>
+                    <td style="font-size:x-small">
+                        Zamanında Gönderim
+                        Başarı Oranı (Başkasının Yerine)
+                    </td>
+                    <td style="font-size:x-small">
+                        Gecikme / Göndermeme
+                        Ceza Puanı*
+                    </td>
+                    <td style="font-size:x-small">Üretilmesi Gereken Rapor Başına Ceza Puanı*</td>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    foreach (var kullanıcı in Model.Kullanıcılar)
+                    {
+                        int temp = 0;
+
+
+                        foreach (var gorev in Model.Gorevler)
+                        {
+                            if (gorev.FirmaId == Model.FirmaId)
+                            {
+                                if (Convert.ToDateTime(gorev.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                {
+                                    if (gorev.KullanıcıId == kullanıcı.KullanıcıId)
+                                    {
+
+
+                                        if (temp != kullanıcı.KullanıcıId)
+                                        {
+
+                                            <tr style="text-align:center;">
+                                                <td>@kullanıcı.Ad @kullanıcı.Soyad</td>
+                                                <td>
+                                                    @{
+                                                        float zamanındaGelenKendi = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevDevir.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId == gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) <= Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        zamanındaGelenKendi += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @zamanındaGelenKendi
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float zamanındaGelenBaskası = 0;
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevDevir.KullanıcıId != kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId != gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) <= Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        zamanındaGelenBaskası += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @zamanındaGelenBaskası
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float gecikenKendi = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevDevir.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId == gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        gecikenKendi += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @gecikenKendi
+                                                    }
+
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        float gecikenBaskası = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevDevir.KullanıcıId != kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+                                                                                if (rapor2.KullanıcıId != gorevDevir.KullanıcıId)
+                                                                                {
+                                                                                    if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati))
+                                                                                    {
+                                                                                        gecikenBaskası += 1;
+                                                                                    }
+                                                                                }
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        @gecikenBaskası
+                                                    }
+                                                </td>
+
+                                                <td>
+                                                    @{
+                                                        float gonderilmeyen = 0;
+                                                        float gereken = 0;
+                                                        foreach (var gorevGereken in Model.Gorevler)
+                                                        {
+                                                            if (gorevGereken.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevGereken.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevGereken.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        gereken += 1;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        float uretilen = 0;
+                                                        foreach (var gorevUretilen in Model.Gorevler)
+                                                        {
+                                                            foreach (var rapor in Model.Raporlar)
+                                                            {
+                                                                if (rapor.FirmaId == Model.FirmaId)
+                                                                {
+                                                                    if (Convert.ToDateTime(rapor.RaporTarihi).Year == Convert.ToInt32(Model.Yıl))
+                                                                    {
+                                                                        if (rapor.RaporTarihi == gorevUretilen.Tarih)
+                                                                        {
+                                                                            if (rapor.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                            {
+                                                                                uretilen += 1;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        gonderilmeyen = gereken - uretilen;
+                                                    }
+                                                    @gonderilmeyen
+                                                </td>
+                                                <td>@((zamanındaGelenKendi / (zamanındaGelenKendi + gecikenKendi + gonderilmeyen)) * 100)%</td>
+                                                <td>@((zamanındaGelenBaskası / (zamanındaGelenBaskası + gecikenBaskası)) * 100)%</td>
+                                                <td>
+                                                    @{
+                                                        float ceza = 0;
+
+                                                        foreach (var gorevDevir in Model.Gorevler)
+                                                        {
+                                                            if (gorevDevir.FirmaId == Model.FirmaId)
+                                                            {
+                                                                if (Convert.ToDateTime(gorevDevir.Tarih).Year == Convert.ToInt32(Model.Yıl))
+                                                                {
+                                                                    if (gorevDevir.KullanıcıId == kullanıcı.KullanıcıId)
+                                                                    {
+                                                                        foreach (var rapor2 in Model.Raporlar)
+                                                                        {
+                                                                            if (gorevDevir.Tarih == rapor2.RaporTarihi)
+                                                                            {
+
+                                                                                if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati) && Convert.ToDateTime(rapor2.RaporSaati) < Convert.ToDateTime(firma.TeslimSaati).AddHours(0.5))
+                                                                                {
+                                                                                    ceza += 1;
+                                                                                }
+                                                                                else if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati).AddHours(0.5) && Convert.ToDateTime(rapor2.RaporSaati) < Convert.ToDateTime(firma.TeslimSaati).AddHours(1.5))
+                                                                                {
+                                                                                    ceza += 3;
+                                                                                }
+                                                                                else if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati).AddHours(1.5) && Convert.ToDateTime(rapor2.RaporSaati) < Convert.ToDateTime(firma.TeslimSaati).AddHours(3))
+                                                                                {
+                                                                                    ceza += 1;
+                                                                                }
+                                                                                else if (Convert.ToDateTime(rapor2.RaporSaati) > Convert.ToDateTime(firma.TeslimSaati).AddHours(3))
+                                                                                {
+                                                                                    ceza += 7;
+                                                                                }
+
+
+
+                                                                            }
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        ceza += gonderilmeyen * 10;
+                                                        @ceza
+                                                    }
+                                                </td>
+                                                <td>@((ceza / (zamanındaGelenKendi + gecikenKendi + gonderilmeyen)))</td>
+
+                                            </tr>
+                                            temp = kullanıcı.KullanıcıId;
+                                        }
+                                        else { }
+                                    }
+
+                                }
+
+                            }
+
+
+                        }
+
+
+
+                    }
+
+                }
+
+            </tbody>
+
+        </table>
+    }
+</form>
+<script>
+
+     function SendData() {              
+              var selectedValue = $("select[name='FirmaId']")[0];
+            $.ajax({
+                data: { "FirmaId": selectedValue  },
+                url: '@Url.Action("Genel")',
+                type: "POST",
+                success: function (returndata) {
+
+                }
+            });
+            var _data = { Yıl: $("#Yıl").val()};
+            $.ajax({
+                url: '@Url.Action("Genel")',
+                type: "POST",
+                data: _data,
+                success: function (result) {}
+            });
+        }
+</script>

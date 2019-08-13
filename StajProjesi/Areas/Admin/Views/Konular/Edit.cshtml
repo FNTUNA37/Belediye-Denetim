@@ -1,0 +1,50 @@
+﻿
+@model StajProjesi.Areas.Admin.ViewModels.KonuEdit
+<link href="~/Content/Create.css" rel="stylesheet" />
+
+@using (Html.BeginForm())
+{
+    @Html.ValidationSummary()
+    <div class="simple-login-container">
+        <h2>YENİ KONU</h2>
+        <div class="col-md-12 form-group">
+
+            @Html.TextBoxFor(x => x.Konu, new { @class = "form-control", @placeholder = "Konu" })
+            @Html.ValidationMessageFor(X => X.Konu, "", new { @class = "text-danger" })
+        </div>
+        <div class=" col-md-12 form-group">
+            <select class="form-control" id="sec" name="BaslıkId">
+                @{
+                    <option selected>Başlık Seçiniz</option>
+                    foreach (var baslık in Model.Baslıklar)
+                    {
+                        <option value="@baslık.BaslıkId">@baslık.BaslıkAdı</option>
+                    }
+                }
+            </select>
+
+
+        </div>
+        <div class="col-md-12 form-group">
+            <input type="submit" value="DEĞİŞTİR" class="btn btn-success" id="tb" />
+            <a href="@Url.Action("Index")" role="button" class="btn btn-outline-primary">GERİ</a>
+        </div>
+    </div>
+
+}
+<script>
+
+        function GetSelected() {
+            var selectedValue = $("select[name='BaslıkId']")[0];
+            $.ajax({
+                data: { "selectedValue": selectedValue  },
+                url: '@Url.Action("New")',
+                type: "POST",
+                success: function (returndata) {
+
+                }
+            });
+        }
+
+
+</script>

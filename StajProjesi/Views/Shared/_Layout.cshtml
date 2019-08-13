@@ -1,0 +1,57 @@
+﻿
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+</head>
+<body>
+    <div>
+        @{
+            if (User.Identity.IsAuthenticated)
+            {
+
+                <nav class="navbar navbar-expand-lg navbar-light " style="background-color:#3599ad;">
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+
+                        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                            <li class="nav-item active">                               
+                            </li>
+                          
+
+                        </ul>
+                        <form class="form-inline my-2 my-lg-0">
+                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                <ul class="nav navbar-nav"></ul>                            
+                                <ul class="nav navbar-nav navbar-right">
+
+                                    <li class="nav-item"><a class="nav-link" href="#">@User.Identity.Name</a></li>
+                                    @{
+                                        if (User.IsInRole("admin"))
+                                        {
+                                            <a href="@Url.Action("Index", "Home", new { area = "admin" })" class="btn btn-outline-light">PANEL</a>
+                                        }
+                                        else if (User.IsInRole("editor"))
+                                        {
+                                            <a href="@Url.Action("Index", "Home", new { area = "admin" })" class="btn btn-outline-danger">PANEL</a>
+                                        }
+                                    }
+                                    <li class="nav-item"><a class="nav-link" href="@Url.RouteUrl("logout")">ÇIKIŞ YAP</a></li>
+
+
+                                </ul>
+                            </div><!-- /.navbar-collapse -->
+                        </form>
+                    </div>
+                </nav>
+            }
+        }
+        @RenderBody()
+    </div>
+</body>
+</html>

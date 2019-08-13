@@ -1,0 +1,32 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.FirmaIndex 
+
+<script src="~/Areas/Admin/Scripts/Forms.js"></script>
+<div class="btn-toolbar">
+    <a href="@Url.Action("New")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-plus"></i>Yeni Firma</a>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Firma Adı</td>
+            <td>Teslim Saati</td>
+            <td>Düzenleme</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var firma in Model.Firmalar)
+        {
+        <tr>
+            <td>@firma.FirmaId</td>
+            <td>@firma.FirmaAdı</td>
+            <td>@firma.TeslimSaati</td>
+            <td>
+                <div class="btn-group">
+                    <a href="@Url.Action("Edit",new {firma.FirmaId})" , class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i>Düzenle</a>
+                    <a href="@Url.Action("Delete",new { firma.FirmaId})" , data-post="@firma.FirmaAdı Firma silinsin mi?" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i>Sil</a>
+                </div>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

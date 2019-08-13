@@ -1,0 +1,39 @@
+﻿@model StajProjesi.Areas.Admin.ViewModels.BaslıkIndex
+
+<script src="~/Areas/Admin/Scripts/Forms.js"></script>
+<div class="btn-toolbar">
+    <a href="@Url.Action("New")" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-plus"></i>Yeni Başlık</a>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>Id</td>
+            <td>Baslık</td>
+            <td>Firma</td>
+            <td>Düzenleme</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var baslık in Model.Baslıklar)
+        {
+        <tr>
+            <td>@baslık.BaslıkId</td>
+            <td>@baslık.BaslıkAdı</td>
+
+            <td>
+                @{
+                    var firma = Database.Session.Load<StajProjesi.Models.Firma>(baslık.FirmaId);
+
+                }
+                @firma.FirmaAdı
+            </td>
+            <td>
+                <div class="btn-group">
+                    <a href="@Url.Action("Edit",new {baslık.BaslıkId})" , class="btn btn-xs btn-primary"><i class="glyphicon glyphicon-edit"></i>Düzenle</a>
+                    <a href="@Url.Action("Delete",new { baslık.BaslıkId})" , data-post="@baslık.BaslıkAdı baslık silinsin mi?" class="btn btn-xs btn-danger"><i class="glyphicon glyphicon-remove"></i>Sil</a>
+                </div>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
